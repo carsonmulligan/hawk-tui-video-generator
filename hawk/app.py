@@ -243,6 +243,12 @@ class HawkTUI(App):
         dock: bottom;
         padding: 0 1;
         background: #2d3748;
+        text-style: bold;
+    }
+
+    #prompt-input.disabled {
+        background: #1a1d23;
+        color: #c9a227;
     }
 
     ProjectSelector {
@@ -424,7 +430,7 @@ class HawkTUI(App):
     @work(exclusive=True, thread=True)
     def _do_generate(self, prompt: str) -> None:
         """Generate images."""
-        self.call_from_thread(self.set_status, f"Generating with {self.project.name}...", True)
+        self.call_from_thread(self._show_generating, prompt)
         try:
             paths = replicate_client.generate_image(self.project, prompt)
             self.call_from_thread(self.refresh_images)
@@ -432,6 +438,22 @@ class HawkTUI(App):
             self.call_from_thread(self._focus_images)
         except Exception as e:
             self.call_from_thread(self.set_status, f"Error: {str(e)[:50]}")
+        finally:
+            self.call_from_thread(self._hide_generating)
+
+    def _show_generating(self, prompt: str) -> None:
+        """Show generating state."""
+        self.set_status(f"⏳ Generating: {prompt[:30]}...", True)
+        # Disable input while generating
+        prompt_input = self.query_one("#prompt-input", PromptInput)
+        prompt_input.placeholder = "⏳ Generating... please wait"
+        prompt_input.disabled = True
+
+    def _hide_generating(self) -> None:
+        """Hide generating state."""
+        prompt_input = self.query_one("#prompt-input", PromptInput)
+        prompt_input.placeholder = "Enter prompt and press Enter to generate..."
+        prompt_input.disabled = False
 
     def _focus_images(self) -> None:
         """Focus images after generation."""
