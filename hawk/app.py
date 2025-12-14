@@ -5,6 +5,7 @@ from textual.containers import Container, Vertical, Horizontal
 from textual.widgets import Header, Footer, Input, Static
 from textual.binding import Binding
 from textual.reactive import reactive
+from textual.message import Message
 from textual import work
 from rich.text import Text
 from rich.panel import Panel
@@ -34,29 +35,29 @@ class ProjectSelector(Static, can_focus=True):
         idx = self._project_slugs.index(self.selected)
         if idx > 0:
             self.selected = self._project_slugs[idx - 1]
-            self.post_message(self.Changed(self, self.selected))
+            self.post_message(self.Changed(self.selected))
 
     def action_move_down(self) -> None:
         """Move to next project."""
         idx = self._project_slugs.index(self.selected)
         if idx < len(self._project_slugs) - 1:
             self.selected = self._project_slugs[idx + 1]
-            self.post_message(self.Changed(self, self.selected))
+            self.post_message(self.Changed(self.selected))
 
     def action_select(self) -> None:
         """Select current project and move to prompt."""
-        self.post_message(self.Selected(self, self.selected))
+        self.post_message(self.Selected(self.selected))
 
-    class Changed(Static.Changed):
+    class Changed(Message):
         """Project changed message."""
-        def __init__(self, sender: "ProjectSelector", value: str) -> None:
-            super().__init__(sender)
+        def __init__(self, value: str) -> None:
+            super().__init__()
             self.value = value
 
-    class Selected(Static.Changed):
+    class Selected(Message):
         """Project selected (Enter pressed) message."""
-        def __init__(self, sender: "ProjectSelector", value: str) -> None:
-            super().__init__(sender)
+        def __init__(self, value: str) -> None:
+            super().__init__()
             self.value = value
 
     def render(self) -> Panel:
@@ -185,9 +186,9 @@ class PromptInput(Input):
     def action_cancel(self) -> None:
         """Cancel and clear input."""
         self.value = ""
-        self.post_message(self.Cancelled(self))
+        self.post_message(self.Cancelled())
 
-    class Cancelled(Input.Changed):
+    class Cancelled(Message):
         """Input cancelled message."""
         pass
 
