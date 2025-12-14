@@ -19,6 +19,19 @@ class ProjectSelector(Static, can_focus=True):
     """Sidebar showing available projects."""
 
     selected = reactive("dxp-labs")  # Default to DXP where images exist
+    _project_slugs = list(PROJECTS.keys())
+
+    def move_up(self) -> None:
+        """Move to previous project."""
+        idx = self._project_slugs.index(self.selected)
+        if idx > 0:
+            self.selected = self._project_slugs[idx - 1]
+
+    def move_down(self) -> None:
+        """Move to next project."""
+        idx = self._project_slugs.index(self.selected)
+        if idx < len(self._project_slugs) - 1:
+            self.selected = self._project_slugs[idx + 1]
 
     def render(self) -> Panel:
         lines = []
@@ -408,10 +421,22 @@ class HawkTUI(App):
 
     # Cursor movement
     def action_cursor_up(self) -> None:
-        self.image_list.move_up()
+        """Move up in the focused panel."""
+        if isinstance(self.focused, ProjectSelector):
+            selector = self.query_one("#project-selector", ProjectSelector)
+            selector.move_up()
+            self.current_project = selector.selected
+        else:
+            self.image_list.move_up()
 
     def action_cursor_down(self) -> None:
-        self.image_list.move_down()
+        """Move down in the focused panel."""
+        if isinstance(self.focused, ProjectSelector):
+            selector = self.query_one("#project-selector", ProjectSelector)
+            selector.move_down()
+            self.current_project = selector.selected
+        else:
+            self.image_list.move_down()
 
     # Selection
     def action_toggle_select(self) -> None:
@@ -433,9 +458,8 @@ class HawkTUI(App):
 
     def action_open_image(self) -> None:
         """Open the current image in system viewer (Preview.app)."""
-        # Don't open if prompt is visible (Enter should submit prompt)
-        prompt_container = self.query_one("#prompt-container")
-        if prompt_container.has_class("visible"):
+        # Don't open if prompt input is focused (Enter should submit prompt)
+        if isinstance(self.focused, Input):
             return
 
         images = self.image_list.images
