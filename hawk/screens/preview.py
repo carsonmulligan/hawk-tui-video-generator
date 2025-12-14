@@ -123,12 +123,13 @@ class ImagePreviewScreen(Screen):
         """Open current image in macOS Preview."""
         subprocess.Popen(["open", str(self.image_path)])
 
-    def on_key(self, event) -> None:
-        """Handle escape key directly to ensure we close properly."""
-        if event.key == "escape":
-            self.app.pop_screen()
-            event.prevent_default()
-            event.stop()
+    def key_escape(self) -> None:
+        """Handle escape key to close preview."""
+        self.app.pop_screen()
+
+    def key_q(self) -> None:
+        """Handle q key to close preview."""
+        self.app.pop_screen()
 
     def action_close(self) -> None:
         """Close the preview and return to main app."""

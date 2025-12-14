@@ -13,7 +13,6 @@ from pathlib import Path
 from hawk.config import PROJECTS, COLORS, Project
 from hawk import replicate_client, video
 from hawk.screens.splash import SplashScreen
-from hawk.screens.preview import ImagePreviewScreen
 
 
 class ProjectSelector(Static, can_focus=True):
@@ -433,7 +432,7 @@ class HawkTUI(App):
         self.set_status("Selection cleared")
 
     def action_open_image(self) -> None:
-        """Open the current image in preview screen."""
+        """Open the current image in system viewer (Preview.app)."""
         # Don't open if prompt is visible (Enter should submit prompt)
         prompt_container = self.query_one("#prompt-container")
         if prompt_container.has_class("visible"):
@@ -443,8 +442,9 @@ class HawkTUI(App):
         cursor = self.image_list.cursor
         if images and 0 <= cursor < len(images):
             image_path = images[cursor]
-            self.set_status(f"Previewing: {image_path.name}")
-            self.push_screen(ImagePreviewScreen(image_path, all_images=images))
+            import subprocess
+            subprocess.Popen(["open", str(image_path)])
+            self.set_status(f"Opened: {image_path.name}")
         else:
             self.set_status("No image to open")
 
