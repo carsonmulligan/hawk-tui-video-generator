@@ -1,1 +1,3 @@
 .env
+hawk/__pycache__
+content/dxp-albs/exports

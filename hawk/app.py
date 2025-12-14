@@ -1,15 +1,13 @@
 """Hawk TUI - Main Textual application."""
 
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical, ScrollableContainer
-from textual.widgets import Header, Footer, Input, Static, Button, Label, ListItem, ListView
+from textual.containers import Container, ScrollableContainer
+from textual.widgets import Header, Footer, Input, Static
 from textual.binding import Binding
 from textual.reactive import reactive
-from textual.screen import Screen
 from textual import work
 from rich.text import Text
 from rich.panel import Panel
-from rich.table import Table
 from pathlib import Path
 
 from hawk.config import PROJECTS, COLORS, Project
@@ -19,13 +17,13 @@ from hawk import replicate_client, video
 class ProjectSelector(Static):
     """Sidebar showing available projects."""
 
-    selected = reactive("wedding-vision")
+    selected = reactive("dxp-albs")  # Default to DXP where images exist
 
     def render(self) -> Panel:
         lines = []
         for i, (slug, proj) in enumerate(PROJECTS.items(), 1):
             if slug == self.selected:
-                line = f"[bold {COLORS['accent']}]>[{i}] {proj.name}[/]"
+                line = f"[bold {COLORS['accent']}]▶[{i}] {proj.name}[/]"
             else:
                 line = f" [{COLORS['dim']}][{i}][/] {proj.name}"
             lines.append(line)
@@ -42,25 +40,109 @@ class ProjectSelector(Static):
 class ImageList(Static):
     """Display list of images in current project."""
 
-    images: reactive[list[Path]] = reactive(list)
-    selected_indices: reactive[set[int]] = reactive(set)
+    cursor = reactive(0)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._images: list[Path] = []
+        self._selected: set[int] = set()
+
+    def set_images(self, images: list[Path]) -> None:
+        """Update the image list."""
+        self._images = images
+        self._selected = set()
+        self.cursor = 0
+        self.refresh()
+
+    def set_selected(self, selected: set[int]) -> None:
+        """Update selected indices."""
+        self._selected = selected
+        self.refresh()
+
+    def toggle_current(self) -> None:
+        """Toggle selection of current image."""
+        if self._images and 0 <= self.cursor < len(self._images):
+            if self.cursor in self._selected:
+                self._selected.discard(self.cursor)
+            else:
+                self._selected.add(self.cursor)
+            self.refresh()
+
+    def select_all(self) -> None:
+        """Select all images."""
+        self._selected = set(range(len(self._images)))
+        self.refresh()
+
+    def clear_selection(self) -> None:
+        """Clear all selections."""
+        self._selected = set()
+        self.refresh()
+
+    def move_up(self) -> None:
+        """Move cursor up."""
+        if self._images and self.cursor > 0:
+            self.cursor -= 1
+            self.refresh()
+
+    def move_down(self) -> None:
+        """Move cursor down."""
+        if self._images and self.cursor < len(self._images) - 1:
+            self.cursor += 1
+            self.refresh()
+
+    @property
+    def images(self) -> list[Path]:
+        return self._images
+
+    @property
+    def selected_indices(self) -> set[int]:
+        return self._selected
 
     def render(self) -> Panel:
-        if not self.images:
-            content = "[dim]No images yet. Press [g] to generate.[/]"
+        if not self._images:
+            content = "[dim]No images yet.\n\nPress [3] for DXP Albums\nPress [g] to generate.[/]"
         else:
             lines = []
-            for i, img in enumerate(self.images[:20]):  # Show last 20
-                marker = "[green]✓[/]" if i in self.selected_indices else " "
-                name = img.name[:40] + "..." if len(img.name) > 40 else img.name
-                lines.append(f"{marker} [{i+1:2}] {name}")
+            # Show images around cursor
+            start = max(0, self.cursor - 8)
+            end = min(len(self._images), start + 18)
+
+            for i in range(start, end):
+                img = self._images[i]
+                # Cursor indicator
+                if i == self.cursor:
+                    cursor_mark = f"[bold {COLORS['accent']}]▶[/]"
+                else:
+                    cursor_mark = " "
+
+                # Selection indicator
+                if i in self._selected:
+                    select_mark = f"[green]✓[/]"
+                else:
+                    select_mark = " "
+
+                # Filename (truncate if needed)
+                name = img.name
+                if len(name) > 35:
+                    name = name[:32] + "..."
+
+                lines.append(f"{cursor_mark}{select_mark}[{i+1:2}] {name}")
+
             content = "\n".join(lines)
-            if len(self.images) > 20:
-                content += f"\n[dim]... and {len(self.images) - 20} more[/]"
+
+            # Show scroll indicator
+            if len(self._images) > 18:
+                content += f"\n[dim]({self.cursor + 1}/{len(self._images)}) ↑/↓ to scroll[/]"
+
+        selected_count = len(self._selected)
+        title = f"[bold]IMAGES ({len(self._images)})"
+        if selected_count > 0:
+            title += f" [{COLORS['accent']}]{selected_count} selected[/]"
+        title += "[/]"
 
         return Panel(
             content,
-            title=f"[bold]IMAGES ({len(self.images)})[/]",
+            title=title,
             border_style=COLORS["border"],
         )
 
@@ -68,8 +150,8 @@ class ImageList(Static):
 class StatusBar(Static):
     """Bottom status bar."""
 
-    message: reactive[str] = reactive("Ready")
-    is_working: reactive[bool] = reactive(False)
+    message = reactive("Ready - Press 3 for DXP Albums with images")
+    is_working = reactive(False)
 
     def render(self) -> Text:
         if self.is_working:
@@ -82,36 +164,31 @@ class MenuPanel(Static):
 
     def render(self) -> Panel:
         lines = [
-            f"[{COLORS['accent']}][g][/] Generate images",
-            f"[{COLORS['accent']}][b][/] Browse gallery",
-            f"[{COLORS['accent']}][s][/] Select/deselect",
-            f"[{COLORS['accent']}][a][/] Select all",
+            f"[bold]Navigation[/]",
+            f"[{COLORS['accent']}]↑/↓[/] Move cursor",
+            f"[{COLORS['accent']}]Tab[/] Toggle select",
+            f"[{COLORS['accent']}]a[/]   Select all",
+            f"[{COLORS['accent']}]Esc[/] Clear selection",
             "",
-            f"[{COLORS['accent']}][v][/] Create video",
-            f"[{COLORS['accent']}][o][/] Add audio",
+            f"[bold]Actions[/]",
+            f"[{COLORS['accent']}]g[/] Generate images",
+            f"[{COLORS['accent']}]v[/] Create video",
+            f"[{COLORS['accent']}]b[/] Browse folder",
+            f"[{COLORS['accent']}]o[/] Open image",
+            f"[{COLORS['accent']}]d[/] Delete selected",
             "",
-            f"[{COLORS['accent']}][1][/] Wedding Vision",
-            f"[{COLORS['accent']}][2][/] Latin Bible",
-            f"[{COLORS['accent']}][3][/] DXP Albums",
+            f"[bold]Projects[/]",
+            f"[{COLORS['accent']}]1[/] Wedding Vision",
+            f"[{COLORS['accent']}]2[/] Latin Bible",
+            f"[{COLORS['accent']}]3[/] DXP Albums",
             "",
-            f"[{COLORS['accent']}][d][/] Delete selected",
-            f"[{COLORS['accent']}][q][/] Quit",
+            f"[{COLORS['accent']}]q[/] Quit",
         ]
 
         return Panel(
             "\n".join(lines),
             title="[bold]ACTIONS[/]",
             border_style=COLORS["border"],
-        )
-
-
-class PromptInput(Static):
-    """Prompt input area."""
-
-    def compose(self) -> ComposeResult:
-        yield Input(
-            placeholder="Enter prompt for image generation...",
-            id="prompt-input"
         )
 
 
@@ -184,22 +261,25 @@ class HawkApp(App):
         Binding("g", "generate", "Generate"),
         Binding("b", "browse", "Browse"),
         Binding("v", "create_video", "Video"),
-        Binding("o", "add_audio", "Audio"),
-        Binding("s", "toggle_select", "Select"),
+        Binding("o", "open_image", "Open"),
+        Binding("tab", "toggle_select", "Select"),
+        Binding("space", "toggle_select", "Select"),
         Binding("a", "select_all", "Select All"),
         Binding("d", "delete_selected", "Delete"),
         Binding("1", "select_project_1", "Wedding"),
         Binding("2", "select_project_2", "Latin"),
         Binding("3", "select_project_3", "DXP"),
         Binding("escape", "clear_selection", "Clear"),
+        Binding("up", "cursor_up", "Up"),
+        Binding("down", "cursor_down", "Down"),
+        Binding("k", "cursor_up", "Up"),
+        Binding("j", "cursor_down", "Down"),
     ]
 
-    current_project: reactive[str] = reactive("wedding-vision")
-    selected_images: reactive[set[int]] = reactive(set)
+    current_project = reactive("dxp-albs")  # Start with DXP where images exist
 
     def __init__(self):
         super().__init__()
-        self.images: list[Path] = []
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
@@ -230,28 +310,32 @@ class HawkApp(App):
 
     def on_mount(self) -> None:
         """Initialize the app."""
+        # Set initial project selector state
+        selector = self.query_one("#project-selector", ProjectSelector)
+        selector.selected = self.current_project
         self.refresh_images()
-        self.query_one("#prompt-input", Input).focus()
 
     @property
     def project(self) -> Project:
         """Get the current project."""
         return PROJECTS[self.current_project]
 
+    @property
+    def image_list(self) -> ImageList:
+        """Get the image list widget."""
+        return self.query_one("#image-list", ImageList)
+
     def refresh_images(self) -> None:
         """Refresh the image list."""
-        self.images = replicate_client.get_project_images(self.project)
-        image_list = self.query_one("#image-list", ImageList)
-        image_list.images = self.images
-        image_list.selected_indices = self.selected_images
+        images = replicate_client.get_project_images(self.project)
+        self.image_list.set_images(images)
+        self.set_status(f"{self.project.name}: {len(images)} images")
 
     def watch_current_project(self, project_slug: str) -> None:
         """Called when project changes."""
-        self.selected_images = set()
         selector = self.query_one("#project-selector", ProjectSelector)
         selector.selected = project_slug
         self.refresh_images()
-        self.set_status(f"Switched to {self.project.name}")
 
     def set_status(self, message: str, working: bool = False) -> None:
         """Update the status bar."""
@@ -259,6 +343,7 @@ class HawkApp(App):
         status.message = message
         status.is_working = working
 
+    # Project selection
     def action_select_project_1(self) -> None:
         self.current_project = "wedding-vision"
 
@@ -268,43 +353,52 @@ class HawkApp(App):
     def action_select_project_3(self) -> None:
         self.current_project = "dxp-albs"
 
+    # Cursor movement
+    def action_cursor_up(self) -> None:
+        self.image_list.move_up()
+
+    def action_cursor_down(self) -> None:
+        self.image_list.move_down()
+
+    # Selection
     def action_toggle_select(self) -> None:
         """Toggle selection of current image."""
-        if not self.images:
-            return
-        # For now, just toggle first unselected or last selected
-        if 0 in self.selected_images:
-            self.selected_images.discard(0)
-        else:
-            self.selected_images.add(0)
-        image_list = self.query_one("#image-list", ImageList)
-        image_list.selected_indices = self.selected_images
+        self.image_list.toggle_current()
+        count = len(self.image_list.selected_indices)
+        self.set_status(f"{count} images selected")
 
     def action_select_all(self) -> None:
         """Select all images."""
-        self.selected_images = set(range(len(self.images)))
-        image_list = self.query_one("#image-list", ImageList)
-        image_list.selected_indices = self.selected_images
-        self.set_status(f"Selected {len(self.images)} images")
+        self.image_list.select_all()
+        count = len(self.image_list.selected_indices)
+        self.set_status(f"Selected all {count} images")
 
     def action_clear_selection(self) -> None:
         """Clear all selections."""
-        self.selected_images = set()
-        image_list = self.query_one("#image-list", ImageList)
-        image_list.selected_indices = self.selected_images
+        self.image_list.clear_selection()
         self.set_status("Selection cleared")
+
+    def action_open_image(self) -> None:
+        """Open the current image."""
+        images = self.image_list.images
+        cursor = self.image_list.cursor
+        if images and 0 <= cursor < len(images):
+            import subprocess
+            subprocess.run(["open", str(images[cursor])])
+            self.set_status(f"Opened: {images[cursor].name}")
 
     def action_delete_selected(self) -> None:
         """Delete selected images."""
-        if not self.selected_images:
-            self.set_status("No images selected")
+        selected = self.image_list.selected_indices
+        images = self.image_list.images
+        if not selected:
+            self.set_status("No images selected (Tab to select)")
             return
         count = 0
-        for idx in sorted(self.selected_images, reverse=True):
-            if idx < len(self.images):
-                if replicate_client.delete_image(self.images[idx]):
+        for idx in sorted(selected, reverse=True):
+            if idx < len(images):
+                if replicate_client.delete_image(images[idx]):
                     count += 1
-        self.selected_images = set()
         self.refresh_images()
         self.set_status(f"Deleted {count} images")
 
@@ -331,32 +425,27 @@ class HawkApp(App):
     @work(exclusive=True, thread=True)
     def action_create_video(self) -> None:
         """Create video from selected images."""
-        if not self.selected_images:
-            self.call_from_thread(self.set_status, "Select images first (press 'a' for all)")
+        selected = self.image_list.selected_indices
+        images = self.image_list.images
+
+        if not selected:
+            self.call_from_thread(self.set_status, "Select images first (Tab or 'a' for all)")
             return
 
         self.call_from_thread(self.set_status, "Creating video...", True)
 
         try:
-            selected_paths = [self.images[i] for i in sorted(self.selected_images)]
+            selected_paths = [images[i] for i in sorted(selected)]
             output = video.create_slideshow(self.project, selected_paths)
             self.call_from_thread(self.set_status, f"Video saved: {output.name}")
         except Exception as e:
             self.call_from_thread(self.set_status, f"Error: {str(e)[:50]}")
 
     def action_browse(self) -> None:
-        """Open the exports folder."""
+        """Open the project images folder."""
         import subprocess
-        subprocess.run(["open", str(self.project.exports_dir)])
-        self.set_status(f"Opened {self.project.exports_dir}")
-
-    def action_add_audio(self) -> None:
-        """Show audio files available."""
-        audio_files = video.get_project_audio(self.project)
-        if audio_files:
-            self.set_status(f"Found {len(audio_files)} audio files in {self.project.audio_dir}")
-        else:
-            self.set_status(f"Add audio files to: {self.project.audio_dir}")
+        subprocess.run(["open", str(self.project.images_dir)])
+        self.set_status(f"Opened {self.project.images_dir}")
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle Enter key in prompt input."""
