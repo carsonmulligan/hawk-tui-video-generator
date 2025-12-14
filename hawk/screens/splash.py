@@ -75,4 +75,4 @@ class SplashScreen(Screen):
 
     def action_continue(self) -> None:
         """Continue to main app."""
-        self.app.pop_screen()
+        self.dismiss()
