@@ -1,3 +1,9 @@
+![HawkTUI Splash Screen](docs/splash.png)
+
+i built this to give the claude code agent sdk access to my replicate fine tunes (https://replicate.com/digital-prairie-labs). i use these fine tunes to create short form content as marketing for ios apps on tik tok and instagram. after using claude code for a while i have fallen in love with the terminal ui (tui) so here we are. 
+
+ai slop readme below :) 
+
 # HawkTUI
 
 A terminal-based TikTok video creator with AI image generation. Generate images using custom Replicate models and assemble them into 9:16 TikTok-format videos with FFmpeg.
@@ -6,7 +12,7 @@ A terminal-based TikTok video creator with AI image generation. Generate images 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-![HawkTUI Splash Screen](docs/splash.png)
+
 
 ![HawkTUI Main Interface](docs/app.png)
 
