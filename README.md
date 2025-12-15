@@ -6,9 +6,9 @@ A terminal-based TikTok video creator with AI image generation. Generate images 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-![HawkTUI Splash Screen](splash.png)
+![HawkTUI Splash Screen](docs/splash.png)
 
-![HawkTUI Main Interface](app.png)
+![HawkTUI Main Interface](docs/app.png)
 
 ## Features
 
@@ -133,8 +133,8 @@ content/                # Generated content (created automatically)
 
 ```bash
 # Clone the repo
-git clone https://github.com/carsonmulligan/hawktui.git
-cd hawktui
+git clone https://github.com/carsonmulligan/hawk-tui-video-generator.git
+cd hawk-tui-video-generator
 
 # Install in development mode
 pip install -e .
