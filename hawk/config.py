@@ -7,11 +7,34 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
+# Load .env file (for backwards compatibility)
 load_dotenv()
+
+# Also load from ~/.config/hawk/config.toml if it exists
+_CONFIG_FILE = Path.home() / ".config" / "hawk" / "config.toml"
+if _CONFIG_FILE.exists():
+    try:
+        with open(_CONFIG_FILE) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    key = key.strip()
+                    value = value.strip().strip('"').strip("'")
+                    # Only set if not already in environment (env vars take precedence)
+                    if key not in os.environ:
+                        os.environ[key] = value
+    except Exception:
+        pass
 
 # Base paths
 BASE_DIR = Path(__file__).parent.parent
-CONTENT_DIR = BASE_DIR / "content"
+# Allow override via config for PyPI users who don't clone the repo
+_custom_content = os.getenv("CONTENT_DIR")
+if _custom_content:
+    CONTENT_DIR = Path(_custom_content)
+else:
+    CONTENT_DIR = BASE_DIR / "content"
 
 
 @dataclass
