@@ -6,6 +6,10 @@ A terminal-based TikTok video creator with AI image generation. Generate images 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
+![HawkTUI Splash Screen](splash.png)
+
+![HawkTUI Main Interface](app.png)
+
 ## Features
 
 - **AI Image Generation** - Generate images using custom Replicate fine-tuned models
