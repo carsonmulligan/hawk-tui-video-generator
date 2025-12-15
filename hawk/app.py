@@ -11,9 +11,11 @@ from rich.text import Text
 from rich.panel import Panel
 from pathlib import Path
 
-from hawk.config import PROJECTS, COLORS, Project
-from hawk import replicate_client, video
+from hawk.config import PROJECTS, COLORS, Project, USE_OLLAMA, USE_LOCAL_IMAGE_GEN, VERBOSE
+from hawk import image_generator, video
+from hawk.logger import logger
 from hawk.screens.splash import SplashScreen
+from hawk.screens.captions import CaptionEditor
 
 
 class ProjectSelector(Static, can_focus=True):
@@ -278,6 +280,8 @@ class HawkTUI(App):
         Binding("b", "browse", "Browse"),
         Binding("v", "create_video", "Video"),
         Binding("d", "delete_selected", "Delete"),
+        Binding("l", "view_logs", "Logs"),
+        Binding("p", "preview_image", "Preview"),
         Binding("1", "select_project_1", "Wedding"),
         Binding("2", "select_project_2", "Latin"),
         Binding("3", "select_project_3", "DXP"),
@@ -312,12 +316,14 @@ class HawkTUI(App):
 [bold]Images[/]
 [{COLORS['accent']}]Space[/] Toggle select
 [{COLORS['accent']}]a[/] Select all
+[{COLORS['accent']}]p[/] Preview (chafa)
 [{COLORS['accent']}]Esc[/] Clear selection
 
 [bold]Actions[/]
-[{COLORS['accent']}]v[/] Create video
+[{COLORS['accent']}]v[/] Create video + captions
 [{COLORS['accent']}]b[/] Browse folder
 [{COLORS['accent']}]d[/] Delete selected
+[{COLORS['accent']}]l[/] View logs
 
 [bold]Projects[/]
 [{COLORS['accent']}]1[/] Wedding Vision
@@ -344,9 +350,10 @@ class HawkTUI(App):
         return self.query_one("#image-list", ImageList)
 
     def refresh_images(self) -> None:
-        images = replicate_client.get_project_images(self.project)
+        images = image_generator.get_project_images(self.project)
         self.image_list.set_images(images)
-        self.set_status(f"{self.project.name}: {len(images)} images")
+        backend_status = image_generator.get_backend_status()
+        self.set_status(f"{self.project.name}: {len(images)} images | {backend_status}")
 
     def watch_current_project(self, project_slug: str) -> None:
         selector = self.query_one("#project-selector", ProjectSelector)
@@ -431,22 +438,52 @@ class HawkTUI(App):
     def _do_generate(self, prompt: str) -> None:
         """Generate images."""
         self.call_from_thread(self._show_generating, prompt)
+        
+        def progress_update(step: int, total: int, status: str):
+            """Update status bar with generation progress."""
+            if total > 0:
+                pct = int((step / total) * 100)
+                bar = "█" * (pct // 10) + "░" * (10 - pct // 10)
+                self.call_from_thread(
+                    self.set_status, 
+                    f"⏳ [{bar}] {status}", 
+                    True
+                )
+            else:
+                self.call_from_thread(self.set_status, f"⏳ {status}", True)
+        
         try:
-            paths = replicate_client.generate_image(self.project, prompt)
+            logger.info(f"User requested generation: {prompt[:50]}...")
+            paths, metadata = image_generator.generate_image(
+                self.project, 
+                prompt,
+                progress_callback=progress_update,
+            )
             self.call_from_thread(self.refresh_images)
-            self.call_from_thread(self.set_status, f"Generated {len(paths)} image(s)")
+            # Show enhanced status if prompt was enhanced
+            status_msg = f"Generated {len(paths)} image(s)"
+            if metadata.get("enhanced"):
+                status_msg += " [enhanced]"
+            self.call_from_thread(self.set_status, status_msg)
             self.call_from_thread(self._focus_images)
         except Exception as e:
-            self.call_from_thread(self.set_status, f"Error: {str(e)[:50]}")
+            import traceback
+            error_msg = f"{type(e).__name__}: {str(e)}"
+            logger.error(f"Generation failed: {error_msg}")
+            logger.error(traceback.format_exc())
+            # Show full error in status (truncated for display)
+            self.call_from_thread(self.set_status, f"Error: {error_msg[:80]}")
         finally:
             self.call_from_thread(self._hide_generating)
 
     def _show_generating(self, prompt: str) -> None:
         """Show generating state."""
-        self.set_status(f"⏳ Generating: {prompt[:30]}...", True)
+        backend = "Local" if USE_LOCAL_IMAGE_GEN else "Replicate"
+        enhancing = " (enhancing)" if USE_OLLAMA else ""
+        self.set_status(f"⏳ [{backend}]{enhancing} Generating: {prompt[:25]}...", True)
         # Disable input while generating
         prompt_input = self.query_one("#prompt-input", PromptInput)
-        prompt_input.placeholder = "⏳ Generating... please wait"
+        prompt_input.placeholder = f"⏳ Generating via {backend}... please wait"
         prompt_input.disabled = True
 
     def _hide_generating(self) -> None:
@@ -469,34 +506,111 @@ class HawkTUI(App):
         count = 0
         for idx in sorted(selected, reverse=True):
             if idx < len(images):
-                if replicate_client.delete_image(images[idx]):
+                if image_generator.delete_image(images[idx]):
                     count += 1
         self.refresh_images()
         self.set_status(f"Deleted {count} images")
 
-    @work(exclusive=True, thread=True)
     def action_create_video(self) -> None:
-        """Create video from selected images."""
+        """Create video from selected images - shows caption editor first."""
         selected = self.image_list.selected_indices
         images = self.image_list.images
+        
+        logger.info(f"Create video requested: {len(selected)} images selected")
 
         if not selected:
-            self.call_from_thread(self.set_status, "Select images first (Space or 'a' for all)")
+            self.set_status("⚠️ Select images first! Use Space to select, 'a' for all")
             return
 
-        self.call_from_thread(self.set_status, "Creating video...", True)
+        # Get selected image paths
+        selected_paths = [images[i] for i in sorted(selected)]
+        
+        # Show caption editor modal
+        def handle_captions(captions: list[str] | None) -> None:
+            if captions is None:
+                # User cancelled
+                self.set_status("Video creation cancelled")
+                return
+            
+            # Create video with or without captions
+            self._create_video_with_captions(selected_paths, captions)
+        
+        self.push_screen(CaptionEditor(selected_paths), handle_captions)
+
+    @work(exclusive=True, thread=True)
+    def _create_video_with_captions(self, selected_paths: list[Path], captions: list[str]) -> None:
+        """Actually create the video (runs in thread)."""
+        self.call_from_thread(self.set_status, f"Creating video from {len(selected_paths)} images...", True)
         try:
-            selected_paths = [images[i] for i in sorted(selected)]
-            output = video.create_slideshow(self.project, selected_paths)
-            self.call_from_thread(self.set_status, f"Video saved: {output.name}")
+            logger.info(f"Creating slideshow: {[p.name for p in selected_paths]}")
+            logger.info(f"Captions: {captions}")
+            
+            # Only pass captions if at least one is non-empty
+            has_captions = any(c.strip() for c in captions) if captions else False
+            output = video.create_slideshow(
+                self.project,
+                selected_paths,
+                captions=captions if has_captions else None,
+            )
+            
+            logger.info(f"Video saved: {output}")
+            self.call_from_thread(self.set_status, f"✅ Video saved: {output.name}")
+            
+            # Open the exports folder
+            import subprocess
+            subprocess.run(["open", str(output.parent)])
         except Exception as e:
-            self.call_from_thread(self.set_status, f"Error: {str(e)[:50]}")
+            logger.error(f"Video creation failed: {e}")
+            self.call_from_thread(self.set_status, f"❌ Error: {str(e)[:60]}")
 
     def action_browse(self) -> None:
         """Open the project images folder."""
         import subprocess
         subprocess.run(["open", str(self.project.images_dir)])
         self.set_status(f"Opened {self.project.images_dir}")
+
+    def action_view_logs(self) -> None:
+        """Open the log file in default editor."""
+        import subprocess
+        from hawk.config import LOG_FILE
+        subprocess.run(["open", str(LOG_FILE)])
+        self.set_status(f"Opened log: {LOG_FILE}")
+
+    def action_preview_image(self) -> None:
+        """Preview current image in terminal using chafa (if installed) or Quick Look."""
+        images = self.image_list.images
+        cursor = self.image_list.cursor
+        
+        if not images or cursor >= len(images):
+            self.set_status("No image to preview")
+            return
+        
+        image_path = images[cursor]
+        
+        import subprocess
+        import shutil
+        
+        # Check if chafa is available for in-terminal preview
+        if shutil.which("chafa"):
+            # Suspend TUI, show image with chafa, resume
+            with self.suspend():
+                print(f"\n📷 {image_path.name}\n")
+                # Use chafa with auto-detect, fit to terminal width
+                subprocess.run([
+                    "chafa", 
+                    "--size", "80x40",
+                    "--animate", "off",
+                    str(image_path)
+                ])
+                print("\n[Press Enter to return to HawkTUI]")
+                input()
+            self.set_status(f"Previewed: {image_path.name}")
+        else:
+            # Fallback to Quick Look
+            subprocess.Popen(["qlmanage", "-p", str(image_path)], 
+                            stdout=subprocess.DEVNULL, 
+                            stderr=subprocess.DEVNULL)
+            self.set_status(f"Quick Look: {image_path.name} (install chafa for in-terminal: brew install chafa)")
 
 
 def main():

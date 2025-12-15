@@ -93,6 +93,25 @@ REPLICATE_DEFAULT_PARAMS = {
 REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
+# Ollama settings (for prompt enhancement)
+USE_OLLAMA = os.getenv("USE_OLLAMA", "false").lower() == "true"
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:latest")
+
+# Local image generation settings (Hugging Face Diffusers)
+USE_LOCAL_IMAGE_GEN = os.getenv("USE_LOCAL_IMAGE_GEN", "false").lower() == "true"
+# Model options:
+#   black-forest-labs/FLUX.1-schnell - Best quality, 4 steps, ~23GB RAM
+#   stabilityai/sdxl-turbo - Fast, 8-15 steps, ~6GB RAM
+#   stabilityai/stable-diffusion-xl-base-1.0 - Standard, 20-30 steps, ~6GB RAM
+SD_MODEL = os.getenv("SD_MODEL", "stabilityai/sdxl-turbo")
+SD_INFERENCE_STEPS = int(os.getenv("SD_INFERENCE_STEPS", "15"))  # 4 for Flux, 8-15 for turbo, 20-30 for standard
+SD_GUIDANCE_SCALE = float(os.getenv("SD_GUIDANCE_SCALE", "0.0"))  # 0.0 for Flux/turbo, 7.5 for standard
+
+# Debug/verbose mode
+VERBOSE = os.getenv("VERBOSE", "false").lower() == "true"
+LOG_FILE = BASE_DIR / "hawk.log"
+
 
 # Color palette (CEO CLI style)
 COLORS = {

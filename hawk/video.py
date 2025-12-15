@@ -2,6 +2,7 @@
 
 import subprocess
 import shutil
+import textwrap
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -12,6 +13,20 @@ from hawk.config import Project, TIKTOK_WIDTH, TIKTOK_HEIGHT
 def check_ffmpeg() -> bool:
     """Check if FFmpeg is installed."""
     return shutil.which("ffmpeg") is not None
+
+
+def wrap_text_for_video(text: str, max_chars: int = 35) -> str:
+    """
+    Wrap text to fit within video frame.
+    FFmpeg drawtext doesn't auto-wrap, so we insert newlines.
+    """
+    # Use textwrap to break into lines
+    lines = textwrap.wrap(text, width=max_chars)
+    # Limit to 3 lines max for readability
+    if len(lines) > 3:
+        lines = lines[:3]
+        lines[2] = lines[2][:max_chars-3] + "..."
+    return "\n".join(lines)
 
 
 def create_slideshow(
@@ -72,24 +87,50 @@ def create_slideshow(
 
     # Add captions if provided
     output_stream = "[outv]"
-    if captions:
-        caption_filter = "[outv]"
+    if captions and any(c.strip() for c in captions):
+        # Build drawtext filters for each caption
+        drawtext_filters = []
         for i, caption in enumerate(captions[:len(images)]):
-            if not caption:
+            if not caption or not caption.strip():
                 continue
-            # Escape special characters for FFmpeg
-            safe_caption = caption.replace("'", "'\\''").replace(":", "\\:")
+            
+            # Wrap long text to multiple lines
+            wrapped_caption = wrap_text_for_video(caption.strip(), max_chars=30)
+            
+            # Escape special characters for FFmpeg drawtext
+            safe_caption = (
+                wrapped_caption
+                .replace("\\", "\\\\")
+                .replace("'", "'\\''")
+                .replace(":", "\\:")
+                .replace("%", "\\%")
+            )
             start_time = i * duration_per_image
             end_time = (i + 1) * duration_per_image
-            caption_filter += (
+            
+            # Count lines for vertical positioning adjustment
+            line_count = safe_caption.count("\n") + 1
+            # Adjust y position based on line count (move up for more lines)
+            y_offset = 0.85 - (line_count * 0.04)
+            
+            # Position: centered horizontally, bottom area adjusted for line count
+            drawtext_filters.append(
                 f"drawtext=text='{safe_caption}':"
-                f"fontsize=48:fontcolor=white:borderw=3:bordercolor=black:"
-                f"x=(w-text_w)/2:y=h-200:"
-                f"enable='between(t,{start_time},{end_time})',"
+                f"fontsize=48:"
+                f"fontcolor=white:"
+                f"borderw=3:"
+                f"bordercolor=black:"
+                f"x=(w-text_w)/2:"
+                f"y=h*{y_offset}:"
+                f"line_spacing=8:"
+                f"enable='between(t\\,{start_time}\\,{end_time})'"
             )
-        caption_filter = caption_filter.rstrip(",") + "[final]"
-        filter_parts.append(caption_filter)
-        output_stream = "[final]"
+        
+        if drawtext_filters:
+            # Chain all drawtext filters together
+            caption_filter = "[outv]" + ",".join(drawtext_filters) + "[final]"
+            filter_parts.append(caption_filter)
+            output_stream = "[final]"
 
     # Build the FFmpeg command
     cmd = ["ffmpeg", "-y"]
