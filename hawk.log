@@ -1,0 +1,359 @@
+2025-12-14 22:39:39 [INFO] hawk: Testing verbose mode
+2025-12-14 22:39:39 [DEBUG] hawk: Checking Ollama availability at http://localhost:11434
+2025-12-14 22:39:39 [DEBUG] hawk: Ollama available: True
+2025-12-14 22:39:39 [DEBUG] hawk: Checking Ollama availability at http://localhost:11434
+2025-12-14 22:39:39 [DEBUG] hawk: Ollama available: True
+2025-12-14 22:40:45 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 22:40:45 [DEBUG] hawk: Prompt: a futuristic spaceship...
+2025-12-14 22:40:45 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 22:40:45 [DEBUG] hawk: Checking Ollama availability at http://localhost:11434
+2025-12-14 22:40:45 [DEBUG] hawk: Ollama available: True
+2025-12-14 22:40:45 [DEBUG] hawk: Sending prompt to Ollama model llama3.2:latest
+2025-12-14 22:40:50 [INFO] hawk: Ollama enhanced prompt (22 -> 1084 chars)
+2025-12-14 22:40:50 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 22:40:50 [DEBUG] hawk: Enhanced prompt: Generate a highly detailed, cinematic depiction of a sleek, silver-finished spaceship with a curved,...
+2025-12-14 22:40:50 [INFO] hawk: Generating with local Diffusers (stabilityai/stable-diffusion-xl-base-1.0)...
+2025-12-14 22:45:25 [INFO] hawk: Loading stabilityai/stable-diffusion-xl-base-1.0 from cache...
+2025-12-14 22:45:26 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 22:45:26 [INFO] hawk: Loading model weights...
+2025-12-14 22:45:26 [ERROR] hawk: Failed to load model: bad value(s) in fds_to_keep
+2025-12-14 22:45:39 [INFO] hawk: User requested generation: a spaceship...
+2025-12-14 22:45:39 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 22:45:39 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 22:45:41 [INFO] hawk: Ollama enhanced prompt (11 -> 780 chars)
+2025-12-14 22:45:41 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 22:45:41 [INFO] hawk: Generating with local Diffusers (stabilityai/stable-diffusion-xl-base-1.0)...
+2025-12-14 22:45:41 [INFO] hawk: Loading stabilityai/stable-diffusion-xl-base-1.0 from cache...
+2025-12-14 22:45:41 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 22:45:41 [INFO] hawk: Loading model weights...
+2025-12-14 22:45:42 [ERROR] hawk: Failed to load model: bad value(s) in fds_to_keep
+2025-12-14 22:45:42 [ERROR] hawk: Image generation failed: RuntimeError: Failed to load model stabilityai/stable-diffusion-xl-base-1.0
+2025-12-14 22:45:42 [ERROR] hawk: Generation failed: RuntimeError: Failed to load model stabilityai/stable-diffusion-xl-base-1.0
+2025-12-14 22:45:42 [ERROR] hawk: Traceback (most recent call last):
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/app.py", line 483, in _do_generate
+    paths, metadata = image_generator.generate_image(self.project, prompt)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/image_generator.py", line 143, in generate_image
+    paths = local_image_gen.generate_image(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 227, in generate_image
+    pipeline = _get_pipeline(model)
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 146, in _get_pipeline
+    raise RuntimeError(f"Failed to load model {model_name}")
+RuntimeError: Failed to load model stabilityai/stable-diffusion-xl-base-1.0
+
+2025-12-14 22:46:11 [INFO] hawk: User requested generation: generate an image of a spaceship...
+2025-12-14 22:46:11 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 22:46:11 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 22:46:14 [INFO] hawk: Ollama enhanced prompt (32 -> 870 chars)
+2025-12-14 22:46:14 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 22:46:14 [INFO] hawk: Generating with local Diffusers (stabilityai/stable-diffusion-xl-base-1.0)...
+2025-12-14 22:46:14 [INFO] hawk: Loading stabilityai/stable-diffusion-xl-base-1.0 from cache...
+2025-12-14 22:46:14 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 22:46:14 [INFO] hawk: Loading model weights...
+2025-12-14 22:46:14 [ERROR] hawk: Failed to load model: bad value(s) in fds_to_keep
+2025-12-14 22:46:14 [ERROR] hawk: Image generation failed: RuntimeError: Failed to load model stabilityai/stable-diffusion-xl-base-1.0
+2025-12-14 22:46:14 [ERROR] hawk: Generation failed: RuntimeError: Failed to load model stabilityai/stable-diffusion-xl-base-1.0
+2025-12-14 22:46:14 [ERROR] hawk: Traceback (most recent call last):
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/app.py", line 483, in _do_generate
+    paths, metadata = image_generator.generate_image(self.project, prompt)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/image_generator.py", line 143, in generate_image
+    paths = local_image_gen.generate_image(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 227, in generate_image
+    pipeline = _get_pipeline(model)
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 146, in _get_pipeline
+    raise RuntimeError(f"Failed to load model {model_name}")
+RuntimeError: Failed to load model stabilityai/stable-diffusion-xl-base-1.0
+
+2025-12-14 22:47:00 [INFO] hawk: Loading stabilityai/stable-diffusion-xl-base-1.0 from cache...
+2025-12-14 22:47:01 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 22:47:01 [INFO] hawk: Loading model weights...
+2025-12-14 22:47:03 [INFO] hawk: Moving model to mps...
+2025-12-14 22:47:04 [INFO] hawk: Model ready!
+2025-12-14 22:47:30 [INFO] hawk: User requested generation: q...
+2025-12-14 22:47:30 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 22:47:30 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 22:47:30 [INFO] hawk: Ollama enhanced prompt (1 -> 99 chars)
+2025-12-14 22:47:30 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 22:47:30 [INFO] hawk: Generating with local Diffusers (stabilityai/stable-diffusion-xl-base-1.0)...
+2025-12-14 22:47:30 [INFO] hawk: Loading stabilityai/stable-diffusion-xl-base-1.0 from cache...
+2025-12-14 22:47:30 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 22:47:30 [INFO] hawk: Loading model weights...
+2025-12-14 22:47:32 [INFO] hawk: Moving model to mps...
+2025-12-14 22:47:32 [INFO] hawk: Model ready!
+2025-12-14 22:48:33 [INFO] hawk: Loading stabilityai/stable-diffusion-xl-base-1.0 from cache...
+2025-12-14 22:48:34 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 22:48:34 [INFO] hawk: Loading model weights...
+2025-12-14 22:48:35 [ERROR] hawk: Failed to load model: bad value(s) in fds_to_keep
+2025-12-14 22:48:39 [INFO] hawk: User requested generation: a spaceship...
+2025-12-14 22:48:39 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 22:48:39 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 22:48:41 [INFO] hawk: Ollama enhanced prompt (11 -> 654 chars)
+2025-12-14 22:48:41 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 22:48:41 [INFO] hawk: Generating with local Diffusers (stabilityai/stable-diffusion-xl-base-1.0)...
+2025-12-14 22:48:41 [INFO] hawk: Loading stabilityai/stable-diffusion-xl-base-1.0 from cache...
+2025-12-14 22:48:41 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 22:48:41 [INFO] hawk: Loading model weights...
+2025-12-14 22:48:41 [ERROR] hawk: Failed to load model: bad value(s) in fds_to_keep
+2025-12-14 22:48:41 [ERROR] hawk: Image generation failed: RuntimeError: Failed to load model stabilityai/stable-diffusion-xl-base-1.0
+2025-12-14 22:48:41 [ERROR] hawk: Generation failed: RuntimeError: Failed to load model stabilityai/stable-diffusion-xl-base-1.0
+2025-12-14 22:48:41 [ERROR] hawk: Traceback (most recent call last):
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/app.py", line 483, in _do_generate
+    paths, metadata = image_generator.generate_image(self.project, prompt)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/image_generator.py", line 143, in generate_image
+    paths = local_image_gen.generate_image(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 239, in generate_image
+    pipeline = _get_pipeline(model)
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 158, in _get_pipeline
+    raise RuntimeError(f"Failed to load model {model_name}")
+RuntimeError: Failed to load model stabilityai/stable-diffusion-xl-base-1.0
+
+2025-12-14 22:54:20 [INFO] hawk: Downloading stabilityai/sdxl-turbo (~6.5 GB)...
+2025-12-14 22:54:20 [INFO] hawk: This may take several minutes on first run...
+2025-12-14 22:54:22 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 22:54:22 [INFO] hawk: Loading model weights...
+2025-12-14 22:55:56 [INFO] hawk: Moving model to mps...
+2025-12-14 22:55:57 [INFO] hawk: Model ready!
+2025-12-14 22:56:08 [INFO] hawk: User requested generation: a spaceship made out of bananas...
+2025-12-14 22:56:08 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 22:56:08 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 22:56:13 [INFO] hawk: Ollama enhanced prompt (31 -> 858 chars)
+2025-12-14 22:56:13 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 22:56:13 [INFO] hawk: Generating with local Diffusers (stabilityai/sdxl-turbo)...
+2025-12-14 22:56:13 [INFO] hawk: Generation settings: steps=8, guidance=0.0
+2025-12-14 22:56:24 [INFO] hawk: Generated 1 image(s): ['20251214_225613_Imaginary_spaceship_composed_1.png']
+2025-12-14 22:58:31 [INFO] hawk: User requested generation: q...
+2025-12-14 22:58:31 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 22:58:31 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 22:58:32 [INFO] hawk: Ollama enhanced prompt (1 -> 96 chars)
+2025-12-14 22:58:32 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 22:58:32 [INFO] hawk: Generating with local Diffusers (stabilityai/sdxl-turbo)...
+2025-12-14 22:58:32 [INFO] hawk: Generation settings: steps=8, guidance=0.0
+2025-12-14 22:58:33 [ERROR] hawk: Image generation failed: RuntimeError: App is not running
+2025-12-14 22:58:33 [ERROR] hawk: Generation failed: RuntimeError: App is not running
+2025-12-14 22:58:33 [ERROR] hawk: Traceback (most recent call last):
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/app.py", line 453, in _do_generate
+    paths, metadata = image_generator.generate_image(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/image_generator.py", line 147, in generate_image
+    paths = local_image_gen.generate_image(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 274, in generate_image
+    result = pipeline(
+             ^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/.venv/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/.venv/lib/python3.11/site-packages/diffusers/pipelines/stable_diffusion_xl/pipeline_stable_diffusion_xl.py", line 1233, in __call__
+    callback_outputs = callback_on_step_end(self, i, t, callback_kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 266, in step_callback
+    progress_callback(step + 1, num_inference_steps, f"Step {step + 1}/{num_inference_steps}")
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/app.py", line 443, in progress_update
+    self.call_from_thread(
+  File "/Users/jc/projects/hawk-tui-video-generator/.venv/lib/python3.11/site-packages/textual/app.py", line 1720, in call_from_thread
+    raise RuntimeError("App is not running")
+RuntimeError: App is not running
+
+2025-12-14 22:58:36 [INFO] hawk: Loading stabilityai/sdxl-turbo from cache...
+2025-12-14 22:58:37 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 22:58:37 [INFO] hawk: Loading model weights...
+2025-12-14 22:58:39 [INFO] hawk: Moving model to mps...
+2025-12-14 22:58:40 [INFO] hawk: Model ready!
+2025-12-14 22:58:52 [INFO] hawk: User requested generation: a spaceship made out of banas...
+2025-12-14 22:58:52 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 22:58:52 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 22:58:54 [INFO] hawk: Ollama enhanced prompt (29 -> 939 chars)
+2025-12-14 22:58:54 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 22:58:54 [INFO] hawk: Generating with local Diffusers (stabilityai/sdxl-turbo)...
+2025-12-14 22:58:54 [INFO] hawk: Generation settings: steps=20, guidance=0.0
+2025-12-14 22:59:09 [INFO] hawk: Generated 1 image(s): ['20251214_225854_A_vibrant_futuristic_spaceshi_1.png']
+2025-12-14 23:01:41 [INFO] hawk: User requested generation: q...
+2025-12-14 23:01:41 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 23:01:41 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 23:01:43 [INFO] hawk: Ollama enhanced prompt (1 -> 657 chars)
+2025-12-14 23:01:43 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 23:01:43 [INFO] hawk: Generating with local Diffusers (stabilityai/sdxl-turbo)...
+2025-12-14 23:01:43 [INFO] hawk: Generation settings: steps=20, guidance=0.0
+2025-12-14 23:01:43 [ERROR] hawk: Image generation failed: RuntimeError: App is not running
+2025-12-14 23:01:43 [ERROR] hawk: Generation failed: RuntimeError: App is not running
+2025-12-14 23:01:43 [ERROR] hawk: Traceback (most recent call last):
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/app.py", line 453, in _do_generate
+    paths, metadata = image_generator.generate_image(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/image_generator.py", line 147, in generate_image
+    paths = local_image_gen.generate_image(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 271, in generate_image
+    saved_paths = []
+            ^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/app.py", line 443, in progress_update
+    self.call_from_thread(
+  File "/Users/jc/projects/hawk-tui-video-generator/.venv/lib/python3.11/site-packages/textual/app.py", line 1720, in call_from_thread
+    raise RuntimeError("App is not running")
+RuntimeError: App is not running
+
+2025-12-14 23:01:49 [INFO] hawk: Loading stabilityai/sdxl-turbo from cache...
+2025-12-14 23:01:50 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:01:50 [INFO] hawk: Loading model weights...
+2025-12-14 23:01:52 [INFO] hawk: Moving model to mps...
+2025-12-14 23:01:53 [INFO] hawk: Model ready!
+2025-12-14 23:02:01 [INFO] hawk: User requested generation: a spaceship made out of banans...
+2025-12-14 23:02:01 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 23:02:01 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 23:02:02 [INFO] hawk: Ollama enhanced prompt (30 -> 208 chars)
+2025-12-14 23:02:02 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 23:02:02 [INFO] hawk: Generating with local Diffusers (stabilityai/sdxl-turbo)...
+2025-12-14 23:02:02 [INFO] hawk: Generation settings: steps=20, guidance=0.0
+2025-12-14 23:02:17 [INFO] hawk: Generated 1 image(s): ['20251214_230202_Futuristic_spaceship_construct_1.png']
+2025-12-14 23:02:39 [INFO] hawk: Loading stabilityai/sdxl-turbo from cache...
+2025-12-14 23:02:40 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:02:40 [INFO] hawk: Loading model weights...
+2025-12-14 23:02:42 [INFO] hawk: Moving model to mps...
+2025-12-14 23:02:43 [INFO] hawk: Model ready!
+2025-12-14 23:03:04 [INFO] hawk: User requested generation: a spaceship made out of bananas...
+2025-12-14 23:03:04 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 23:03:04 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 23:03:05 [INFO] hawk: Ollama enhanced prompt (31 -> 164 chars)
+2025-12-14 23:03:05 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 23:03:05 [INFO] hawk: Generating with local Diffusers (stabilityai/sdxl-turbo)...
+2025-12-14 23:03:05 [INFO] hawk: Generation settings: steps=30, guidance=0.0
+2025-12-14 23:03:27 [INFO] hawk: Generated 1 image(s): ['20251214_230305_A_futuristic_spaceship_compose_1.png']
+2025-12-14 23:04:23 [INFO] hawk: Loading stabilityai/sdxl-turbo from cache...
+2025-12-14 23:04:24 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:04:24 [INFO] hawk: Loading model weights...
+2025-12-14 23:04:26 [INFO] hawk: Moving model to mps...
+2025-12-14 23:04:26 [INFO] hawk: Model ready!
+2025-12-14 23:04:44 [INFO] hawk: User requested generation: a spaceship made out of bananas flying...
+2025-12-14 23:04:44 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 23:04:44 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 23:04:45 [INFO] hawk: Ollama enhanced prompt (38 -> 183 chars)
+2025-12-14 23:04:45 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 23:04:45 [INFO] hawk: Generating with local Diffusers (stabilityai/sdxl-turbo)...
+2025-12-14 23:04:45 [INFO] hawk: Generation settings: steps=7, guidance=0.0
+2025-12-14 23:04:51 [INFO] hawk: Generated 1 image(s): ['20251214_230445_Cinematic_8k_resolution_deta_1.png']
+2025-12-14 23:05:13 [INFO] hawk: Loading stabilityai/sdxl-turbo from cache...
+2025-12-14 23:05:15 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:05:15 [INFO] hawk: Loading model weights...
+2025-12-14 23:05:16 [INFO] hawk: Moving model to mps...
+2025-12-14 23:05:17 [INFO] hawk: Model ready!
+2025-12-14 23:05:45 [INFO] hawk: User requested generation: a spaceship made out of bananas flying...
+2025-12-14 23:05:45 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 23:05:45 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 23:05:45 [INFO] hawk: Ollama enhanced prompt (38 -> 230 chars)
+2025-12-14 23:05:45 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 23:05:45 [INFO] hawk: Generating with local Diffusers (stabilityai/sdxl-turbo)...
+2025-12-14 23:05:45 [INFO] hawk: Generation settings: steps=8, guidance=0.0
+2025-12-14 23:05:52 [INFO] hawk: Generated 1 image(s): ['20251214_230545_High-definition_image_8k_reso_1.png']
+2025-12-14 23:06:31 [INFO] hawk: Loading stabilityai/sdxl-turbo from cache...
+2025-12-14 23:06:32 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:06:32 [INFO] hawk: Loading model weights...
+2025-12-14 23:06:34 [INFO] hawk: Moving model to mps...
+2025-12-14 23:06:34 [INFO] hawk: Model ready!
+2025-12-14 23:06:44 [INFO] hawk: User requested generation: a spaceship made out of bananas flying...
+2025-12-14 23:06:44 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 23:06:44 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 23:06:45 [INFO] hawk: Ollama enhanced prompt (38 -> 180 chars)
+2025-12-14 23:06:45 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 23:06:45 [INFO] hawk: Generating with local Diffusers (stabilityai/sdxl-turbo)...
+2025-12-14 23:06:45 [INFO] hawk: Generation settings: steps=40, guidance=2.0
+2025-12-14 23:07:44 [INFO] hawk: Generated 1 image(s): ['20251214_230645_A_futuristic_banana-shaped_spa_1.png']
+2025-12-14 23:10:28 [INFO] hawk: Downloading black-forest-labs/FLUX.1-schnell (~4-7 GB)...
+2025-12-14 23:10:28 [INFO] hawk: This may take several minutes on first run...
+2025-12-14 23:10:29 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:10:29 [INFO] hawk: Loading model weights...
+2025-12-14 23:15:22 [ERROR] hawk: Failed to load model: 
+ requires the protobuf library but it was not found in your environment. Check out the instructions on the
+installation page of its repo: https://github.com/protocolbuffers/protobuf/tree/master/python#installation and follow the ones
+that match your environment. Please note that you may need to restart your runtime after installation.
+
+2025-12-14 23:15:37 [INFO] hawk: User requested generation: a spaceship made out of bananas...
+2025-12-14 23:15:37 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 23:15:37 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 23:15:40 [INFO] hawk: Ollama enhanced prompt (31 -> 200 chars)
+2025-12-14 23:15:40 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 23:15:40 [INFO] hawk: Generating with local Diffusers (black-forest-labs/FLUX.1-schnell)...
+2025-12-14 23:15:40 [INFO] hawk: Generation settings: steps=4, guidance=0.0
+2025-12-14 23:15:40 [INFO] hawk: Loading black-forest-labs/FLUX.1-schnell from cache...
+2025-12-14 23:15:40 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:15:40 [INFO] hawk: Loading model weights...
+2025-12-14 23:16:09 [ERROR] hawk: Failed to load model: 
+ requires the protobuf library but it was not found in your environment. Check out the instructions on the
+installation page of its repo: https://github.com/protocolbuffers/protobuf/tree/master/python#installation and follow the ones
+that match your environment. Please note that you may need to restart your runtime after installation.
+
+2025-12-14 23:16:09 [ERROR] hawk: Image generation failed: RuntimeError: Failed to load model black-forest-labs/FLUX.1-schnell
+2025-12-14 23:16:09 [ERROR] hawk: Generation failed: RuntimeError: Failed to load model black-forest-labs/FLUX.1-schnell
+2025-12-14 23:16:09 [ERROR] hawk: Traceback (most recent call last):
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/app.py", line 453, in _do_generate
+    paths, metadata = image_generator.generate_image(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/image_generator.py", line 147, in generate_image
+    paths = local_image_gen.generate_image(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 262, in generate_image
+    pipeline = _get_pipeline(model)
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 160, in _get_pipeline
+    raise RuntimeError(f"Failed to load model {model_name}")
+RuntimeError: Failed to load model black-forest-labs/FLUX.1-schnell
+
+2025-12-14 23:18:02 [INFO] hawk: User requested generation: a spaceship made out of bananas...
+2025-12-14 23:18:02 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 23:18:02 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 23:18:03 [INFO] hawk: Ollama enhanced prompt (31 -> 196 chars)
+2025-12-14 23:18:03 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 23:18:03 [INFO] hawk: Generating with local Diffusers (black-forest-labs/FLUX.1-schnell)...
+2025-12-14 23:18:03 [INFO] hawk: Generation settings: steps=4, guidance=0.0
+2025-12-14 23:18:03 [INFO] hawk: Loading black-forest-labs/FLUX.1-schnell from cache...
+2025-12-14 23:18:03 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:18:03 [INFO] hawk: Loading model weights...
+2025-12-14 23:18:40 [ERROR] hawk: Failed to load model: 
+ requires the protobuf library but it was not found in your environment. Check out the instructions on the
+installation page of its repo: https://github.com/protocolbuffers/protobuf/tree/master/python#installation and follow the ones
+that match your environment. Please note that you may need to restart your runtime after installation.
+
+2025-12-14 23:18:41 [ERROR] hawk: Image generation failed: RuntimeError: Failed to load model black-forest-labs/FLUX.1-schnell
+2025-12-14 23:18:41 [ERROR] hawk: Generation failed: RuntimeError: Failed to load model black-forest-labs/FLUX.1-schnell
+2025-12-14 23:18:41 [ERROR] hawk: Traceback (most recent call last):
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/app.py", line 453, in _do_generate
+    paths, metadata = image_generator.generate_image(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/image_generator.py", line 147, in generate_image
+    paths = local_image_gen.generate_image(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 262, in generate_image
+    pipeline = _get_pipeline(model)
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jc/projects/hawk-tui-video-generator/hawk/local_image_gen.py", line 160, in _get_pipeline
+    raise RuntimeError(f"Failed to load model {model_name}")
+RuntimeError: Failed to load model black-forest-labs/FLUX.1-schnell
+
+2025-12-14 23:20:15 [INFO] hawk: Loading black-forest-labs/FLUX.1-schnell from cache...
+2025-12-14 23:20:17 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:20:17 [INFO] hawk: Loading model weights...
+2025-12-14 23:20:18 [ERROR] hawk: Failed to load model: 
+ requires the protobuf library but it was not found in your environment. Check out the instructions on the
+installation page of its repo: https://github.com/protocolbuffers/protobuf/tree/master/python#installation and follow the ones
+that match your environment. Please note that you may need to restart your runtime after installation.
+
+2025-12-14 23:21:43 [INFO] hawk: Loading black-forest-labs/FLUX.1-schnell from cache...
+2025-12-14 23:21:55 [INFO] hawk: Using Apple Silicon (MPS)
+2025-12-14 23:21:55 [INFO] hawk: Loading model weights...
+2025-12-14 23:22:29 [INFO] hawk: Moving model to mps...
+2025-12-14 23:22:33 [INFO] hawk: Model ready!
+2025-12-14 23:22:43 [INFO] hawk: User requested generation: a spaceship made out of bananas...
+2025-12-14 23:22:43 [INFO] hawk: Starting image generation: backend=local, project=dxp-labs
+2025-12-14 23:22:43 [INFO] hawk: Enhancing prompt with Ollama (llama3.2:latest)...
+2025-12-14 23:22:44 [INFO] hawk: Ollama enhanced prompt (31 -> 175 chars)
+2025-12-14 23:22:44 [INFO] hawk: Prompt enhanced successfully
+2025-12-14 23:22:44 [INFO] hawk: Generating with local Diffusers (black-forest-labs/FLUX.1-schnell)...
+2025-12-14 23:22:44 [INFO] hawk: Generation settings: steps=4, guidance=0.0
+2025-12-14 23:23:22 [INFO] hawk: Generated 1 image(s): ['20251214_232244_A_futuristic_banana_spaceship_1.png']

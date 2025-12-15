@@ -28,6 +28,13 @@ dependencies = [
     "httpx>=0.27.0",
     "python-dotenv>=1.0.0",
     "pillow>=10.0.0",
+    # Local image generation (Flux, SDXL, etc.)
+    "diffusers>=0.30.0",
+    "transformers>=4.40.0",
+    "accelerate>=0.30.0",
+    "torch>=2.0.0",
+    "protobuf>=3.20.0",
+    "sentencepiece>=0.1.99",
 ]
 
 [project.urls]

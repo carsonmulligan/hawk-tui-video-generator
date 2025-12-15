@@ -11,8 +11,8 @@ from rich.text import Text
 from rich.panel import Panel
 from pathlib import Path
 
-from hawk.config import PROJECTS, COLORS, Project
-from hawk import replicate_client, video
+from hawk.config import PROJECTS, COLORS, Project, USE_OLLAMA, USE_LOCAL_IMAGE_GEN, VERBOSE
+from hawk import image_generator, video, logger
 from hawk.screens.splash import SplashScreen
 
 
@@ -278,6 +278,7 @@ class HawkTUI(App):
         Binding("b", "browse", "Browse"),
         Binding("v", "create_video", "Video"),
         Binding("d", "delete_selected", "Delete"),
+        Binding("l", "view_logs", "Logs"),
         Binding("1", "select_project_1", "Wedding"),
         Binding("2", "select_project_2", "Latin"),
         Binding("3", "select_project_3", "DXP"),
@@ -318,6 +319,7 @@ class HawkTUI(App):
 [{COLORS['accent']}]v[/] Create video
 [{COLORS['accent']}]b[/] Browse folder
 [{COLORS['accent']}]d[/] Delete selected
+[{COLORS['accent']}]l[/] View logs
 
 [bold]Projects[/]
 [{COLORS['accent']}]1[/] Wedding Vision
@@ -344,9 +346,10 @@ class HawkTUI(App):
         return self.query_one("#image-list", ImageList)
 
     def refresh_images(self) -> None:
-        images = replicate_client.get_project_images(self.project)
+        images = image_generator.get_project_images(self.project)
         self.image_list.set_images(images)
-        self.set_status(f"{self.project.name}: {len(images)} images")
+        backend_status = image_generator.get_backend_status()
+        self.set_status(f"{self.project.name}: {len(images)} images | {backend_status}")
 
     def watch_current_project(self, project_slug: str) -> None:
         selector = self.query_one("#project-selector", ProjectSelector)
@@ -431,22 +434,52 @@ class HawkTUI(App):
     def _do_generate(self, prompt: str) -> None:
         """Generate images."""
         self.call_from_thread(self._show_generating, prompt)
+        
+        def progress_update(step: int, total: int, status: str):
+            """Update status bar with generation progress."""
+            if total > 0:
+                pct = int((step / total) * 100)
+                bar = "█" * (pct // 10) + "░" * (10 - pct // 10)
+                self.call_from_thread(
+                    self.set_status, 
+                    f"⏳ [{bar}] {status}", 
+                    True
+                )
+            else:
+                self.call_from_thread(self.set_status, f"⏳ {status}", True)
+        
         try:
-            paths = replicate_client.generate_image(self.project, prompt)
+            logger.info(f"User requested generation: {prompt[:50]}...")
+            paths, metadata = image_generator.generate_image(
+                self.project, 
+                prompt,
+                progress_callback=progress_update,
+            )
             self.call_from_thread(self.refresh_images)
-            self.call_from_thread(self.set_status, f"Generated {len(paths)} image(s)")
+            # Show enhanced status if prompt was enhanced
+            status_msg = f"Generated {len(paths)} image(s)"
+            if metadata.get("enhanced"):
+                status_msg += " [enhanced]"
+            self.call_from_thread(self.set_status, status_msg)
             self.call_from_thread(self._focus_images)
         except Exception as e:
-            self.call_from_thread(self.set_status, f"Error: {str(e)[:50]}")
+            import traceback
+            error_msg = f"{type(e).__name__}: {str(e)}"
+            logger.error(f"Generation failed: {error_msg}")
+            logger.error(traceback.format_exc())
+            # Show full error in status (truncated for display)
+            self.call_from_thread(self.set_status, f"Error: {error_msg[:80]}")
         finally:
             self.call_from_thread(self._hide_generating)
 
     def _show_generating(self, prompt: str) -> None:
         """Show generating state."""
-        self.set_status(f"⏳ Generating: {prompt[:30]}...", True)
+        backend = "Local" if USE_LOCAL_IMAGE_GEN else "Replicate"
+        enhancing = " (enhancing)" if USE_OLLAMA else ""
+        self.set_status(f"⏳ [{backend}]{enhancing} Generating: {prompt[:25]}...", True)
         # Disable input while generating
         prompt_input = self.query_one("#prompt-input", PromptInput)
-        prompt_input.placeholder = "⏳ Generating... please wait"
+        prompt_input.placeholder = f"⏳ Generating via {backend}... please wait"
         prompt_input.disabled = True
 
     def _hide_generating(self) -> None:
@@ -469,7 +502,7 @@ class HawkTUI(App):
         count = 0
         for idx in sorted(selected, reverse=True):
             if idx < len(images):
-                if replicate_client.delete_image(images[idx]):
+                if image_generator.delete_image(images[idx]):
                     count += 1
         self.refresh_images()
         self.set_status(f"Deleted {count} images")
@@ -497,6 +530,13 @@ class HawkTUI(App):
         import subprocess
         subprocess.run(["open", str(self.project.images_dir)])
         self.set_status(f"Opened {self.project.images_dir}")
+
+    def action_view_logs(self) -> None:
+        """Open the log file in default editor."""
+        import subprocess
+        from hawk.config import LOG_FILE
+        subprocess.run(["open", str(LOG_FILE)])
+        self.set_status(f"Opened log: {LOG_FILE}")
 
 
 def main():
