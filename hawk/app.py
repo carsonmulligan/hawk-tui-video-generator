@@ -316,7 +316,7 @@ class HawkTUI(App):
 [bold]Images[/]
 [{COLORS['accent']}]Space[/] Toggle select
 [{COLORS['accent']}]a[/] Select all
-[{COLORS['accent']}]p[/] Preview (iTerm2)
+[{COLORS['accent']}]p[/] Preview (chafa)
 [{COLORS['accent']}]Esc[/] Clear selection
 
 [bold]Actions[/]
@@ -577,7 +577,7 @@ class HawkTUI(App):
         self.set_status(f"Opened log: {LOG_FILE}")
 
     def action_preview_image(self) -> None:
-        """Preview current image using iTerm2 imgcat protocol."""
+        """Preview current image in terminal using chafa (if installed) or Quick Look."""
         images = self.image_list.images
         cursor = self.image_list.cursor
         
@@ -587,26 +587,30 @@ class HawkTUI(App):
         
         image_path = images[cursor]
         
-        # Suspend TUI, show image, resume
-        import sys
-        from hawk import local_image_gen
+        import subprocess
+        import shutil
         
-        # Exit alternate screen temporarily
-        sys.stdout.write("\033[?1049l")  # Exit alternate screen
-        sys.stdout.flush()
-        
-        print(f"\n📷 Preview: {image_path.name}\n")
-        local_image_gen.print_image(image_path, width=60)
-        print("\n[Press Enter to return to HawkTUI]")
-        input()
-        
-        # Re-enter alternate screen
-        sys.stdout.write("\033[?1049h")  # Enter alternate screen
-        sys.stdout.flush()
-        
-        # Force refresh
-        self.refresh()
-        self.set_status(f"Previewed: {image_path.name}")
+        # Check if chafa is available for in-terminal preview
+        if shutil.which("chafa"):
+            # Suspend TUI, show image with chafa, resume
+            with self.suspend():
+                print(f"\n📷 {image_path.name}\n")
+                # Use chafa with auto-detect, fit to terminal width
+                subprocess.run([
+                    "chafa", 
+                    "--size", "80x40",
+                    "--animate", "off",
+                    str(image_path)
+                ])
+                print("\n[Press Enter to return to HawkTUI]")
+                input()
+            self.set_status(f"Previewed: {image_path.name}")
+        else:
+            # Fallback to Quick Look
+            subprocess.Popen(["qlmanage", "-p", str(image_path)], 
+                            stdout=subprocess.DEVNULL, 
+                            stderr=subprocess.DEVNULL)
+            self.set_status(f"Quick Look: {image_path.name} (install chafa for in-terminal: brew install chafa)")
 
 
 def main():
